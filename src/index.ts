@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 import { delay } from "./helpers/time";
 import { completeEticket } from "./completeEticket";
 

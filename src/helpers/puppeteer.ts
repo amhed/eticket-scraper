@@ -19,7 +19,7 @@ export const getPuppeteerPage = async (options?: PuppeteerInitOptions): Promise<
   if (options?.stealth) {
     PuppeteerExtra.use(pluginStealth())
   }
-  
+
   PuppeteerExtra.use(
     RecaptchaPlugin({
       provider: { 
@@ -40,7 +40,13 @@ export const getPuppeteerPage = async (options?: PuppeteerInitOptions): Promise<
     ignoreHTTPSErrors: true,
     args: [
       '--no-sandbox',
-      `--window-size=${width},${height}`
+      `--window-size=${width},${height}`,
+      '--window-position=000,000', 
+      '--disable-dev-shm-usage', 
+      '--disable-web-security', 
+      '--disable-features=IsolateOrigins', 
+      ' --disable-site-isolation-trials', 
+      // '--proxy-server=socks5://127.0.0.1:9060'
     ],
   });
 

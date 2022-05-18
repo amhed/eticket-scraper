@@ -1,6 +1,11 @@
 import Puppeteer from "puppeteer";
+import { solveCaptcha } from "./helpers/captcha";
 import { getLogger } from "./helpers/logger";
-import { elementExists, getPuppeteerPage } from "./helpers/puppeteer";
+import {
+  elementExists,
+  getElementText,
+  getPuppeteerPage,
+} from "./helpers/puppeteer";
 import { delay } from "./helpers/time";
 
 const logger = getLogger();
@@ -12,50 +17,29 @@ export const completeEticket = async () => {
     waitUntil: "networkidle2",
   });
 
-  await page.waitForSelector(".recaptcha-checkbox-border");
-  await page.click(".recaptcha-checkbox-border");
+  // Doesn't always work. You can run the browser non-headless and trigger this yourself.
+  // The rest of the form fills up automagically
+  // solveCaptcha(page);
+  // await delay(5000);
 
-  // const $searchBox = '#address_unified_search_address'
-  // await page.waitForSelector($searchBox)
-  // await page.click($searchBox)
-  // await page.type($searchBox, address)
-  // await delay()
+  const $btnSubmit = "#btnSumbit";
+  await page.waitForSelector($btnSubmit, { visible: true });
+  await page.click($btnSubmit);
 
-  // const $houseType = '#address_unified_search_building_type'
-  // await page.select($houseType, 'House')
-  // await delay()
+  const $applicationId = ".card-title";
+  await page.waitForSelector($applicationId);
+  const applicationId = getElementText(page, $applicationId);
 
-  // const $dropdown = '#address_unified_search_bed_style'
-  // await page.select($dropdown, '1-4SUMMARY')
-  // await delay()
-  // await page.$eval('#address_unified_search_form', form => (form as HTMLFormElement).submit());
-
-  // await delay(500)
-  // await page.waitForSelector('table')
-
-  // browser.close();
-};
-
-//TODO: Connect this to captcha check
-const getUrlWithCaptchaCheck = async (
-  page: Puppeteer.Page,
-  url: string
-): Promise<boolean> => {
-  await page.goto(url, {
-    waitUntil: "networkidle2",
-  });
-
-  const captchaPresent = await elementExists(page, "#px-captcha");
-  if (captchaPresent) {
-    // Found a captcha. Try to solve it
-    logger.log("Found captcha... attempting to solve");
-    const captchaResult = await (page as any).solveRecaptchas();
-    await page.waitForNavigation();
-
-    // Let callsite know captcha occurred
-    return false;
-  }
-
-  logger.log("No captcha found. Continuing");
-  return true;
+  // Form values
+  await page.type("#permanentAddress", "405 E 42nd St");
+  await page.select("#countryRes", "United States of America");
+  await page.evaluate((code) => { eval(code); }, `
+    $('.modal-trigger')[0].click(); 
+    setTimeout(() => { selectCity(136821,'New York','New York City'); }, 500);
+  `);
+  await page.type('#ZipCode', '10017');
+  
+  // can be either .entry or .exit
+  await page.click('.form-check-label.exit');
+  await page.click('.btn-next');
 };
