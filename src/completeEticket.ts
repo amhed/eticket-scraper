@@ -41,5 +41,6 @@ export const completeEticket = async () => {
   
   // can be either .entry or .exit
   await page.click('.form-check-label.exit');
-  await page.click('.btn-next');
+  await delay();
+  await page.click("button[type=submit]");
 };
